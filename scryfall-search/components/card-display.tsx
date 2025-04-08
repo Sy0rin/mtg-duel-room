@@ -84,7 +84,7 @@ export function CardDisplay({ searchQuery, onAddCard }: CardDisplayProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 overflow-y-auto max-h-[calc(100vh-200px)]">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto max-h-[calc(100vh-200px)]">
       {data.data.map((card) => (
         <Card
           key={card.id}
