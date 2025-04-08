@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import type { MagicCard } from "./zone"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { AlertCircle } from "lucide-react"
+import { useState } from "react";
 
 interface CardDisplayProps {
   searchQuery: string
@@ -16,6 +17,9 @@ interface CardDisplayProps {
 const fetcher = (url: string) => fetch(url).then((res) => res.json())
 
 export function CardDisplay({ searchQuery, onAddCard }: CardDisplayProps) {
+
+  const [previewCard, setPreviewCard] = useState<MagicCard | null>(null);
+
   // Add support for token search
   const formattedQuery =
     searchQuery.includes("token") && !searchQuery.includes("is:token") ? `${searchQuery} is:token` : searchQuery
@@ -26,7 +30,7 @@ export function CardDisplay({ searchQuery, onAddCard }: CardDisplayProps) {
   )
 
   const handleDoubleClick = (card: MagicCard) => {
-    onAddCard(card, "hand")
+    setPreviewCard(card); // show the card in preview
   }
 
   const handleRightClick = (e: React.MouseEvent, card: MagicCard) => {
@@ -84,6 +88,7 @@ export function CardDisplay({ searchQuery, onAddCard }: CardDisplayProps) {
   }
 
   return (
+    <>
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto max-h-[calc(100vh-200px)]">
       {data.data.map((card) => (
         <Card
@@ -98,7 +103,7 @@ export function CardDisplay({ searchQuery, onAddCard }: CardDisplayProps) {
                 <img
                   src={getCardImageUrl(card) || "/placeholder.svg"}
                   alt={card.name}
-                  className="w-full h-auto rounded-lg"
+                  className="rounded w-[140px] drop-shadow"
                   onError={(e) => {
                     // Fallback if image fails to load
                     ;(e.target as HTMLImageElement).src = "/placeholder.svg?height=200&width=140"
@@ -117,6 +122,28 @@ export function CardDisplay({ searchQuery, onAddCard }: CardDisplayProps) {
         </Card>
       ))}
     </div>
+    {previewCard && (
+      <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
+        onClick={() => setPreviewCard(null)}
+      >
+        <div
+          className="bg-white p-4 rounded shadow-lg max-w-[90vw] max-h-[90vh] overflow-auto"
+          onClick={(e) => e.stopPropagation()} // click outside to close
+        >
+          <img
+            src={
+              previewCard.image_uris?.normal ||
+              previewCard.card_faces?.[0]?.image_uris?.normal ||
+              "/placeholder.svg"
+            }
+            alt={previewCard.name}
+            className="rounded max-h-[80vh]"
+          />
+          <p className="text-black text-center mt-2 font-semibold">{previewCard.name}</p>
+        </div>
+      </div>
+    )}
+    </>    
   )
 }
 
